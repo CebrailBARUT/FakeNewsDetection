@@ -22,12 +22,14 @@ MuCoefficient = 20
 mumCoefficient = 20
 crossoverProbability = .9
 mutationProbability = .1
-max_iteration = 10
+max_iteration = 100
 numOfObjective=2
 ObjectiveFunciton=["precision","recall"]
 lower = np.array([0, 0])
 upper = np.array([1, 1])
+#dataset
 csv_file = ".\\DataSet\\Syrian.csv" 
+#experiment results
 test_file = "Experiments/Test/Test.csv"
 df = pd.read_csv(csv_file, sep=';', lineterminator='\r')
 df = df.dropna()
@@ -120,7 +122,7 @@ def PerformOperation(classIndex, pop, method, x_train,y_train, fold):
         if(method):
            
            # start_time = time.time()
-           pop.calculate_crowding_distance()
+           pop.CalculateCrowdingDistanceLevel()
            # finishtime = time.time()
            # time_difference_ms = (finishtime - start_time) * 1000
            # print(f"Geçen süre: {time_difference_ms} ms")

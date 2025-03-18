@@ -241,9 +241,9 @@ class PopulationNSGA:
     def CalculateCrowdingDistanceLevel(self):
 
             # Amaç sayısını koru
-            amacSayi = 2
+            numofObject = 2
     
-            # self.population.clear()
+  
  
             for k in range(len(self.allFrontLists)):
                 
@@ -263,12 +263,12 @@ class PopulationNSGA:
                 for i in range(n):
                     fListe[i].setCrowdingDistance(0) 
                   
-                for amc in range(amacSayi):  # Her amaç için dön
+                for amc in range(numofObject):  # Her amaç için dön
                          obj_values = [ind.getObjectiveValues()[amc] for ind in fListe]  
                          max_val = max(obj_values)  
                          min_val = min(obj_values)  
 
-        # Uç noktaları bul ve listeye ekle (aynı elemanı iki kere eklememek için set kullanabiliriz)
+       
                 extremes = [ind for ind in fListe if ind.getObjectiveValues()[amc] in (max_val, min_val)]
                 remaining = [
     ind for ind in fListe 
@@ -278,11 +278,8 @@ class PopulationNSGA:
 
                 for t in range(len(extremes)):
                     extremes[t].setCrowdingDistanceLevel(0)
-                    # print("extremes:",extremes[t].getObjectiveValues(),":0")
-                # print("len(extreme):",len(extremes))  
-                # print("len(flist):",len(fListe))
-                if(len(extremes)>2):
-                    a=1
+                  
+               
                 maximum=0
                 for m in range(len(remaining)):
                     
@@ -291,14 +288,14 @@ class PopulationNSGA:
                         if(remaining[s].getCrowdingDistanceLevel()==-1):
                              for j in range (len(extremes)):
                                         
-                                for amc in range(amacSayi):
+                                for amc in range(numofObject):
                                          remaining[s].setCrowdingDistance(remaining[s].getCrowdingDistance()+ np.abs(remaining[s].getObjectiveValues()[amc]-extremes[j].getObjectiveValues()[amc]))
                                
                              maximum=-1
                              indis=-1
                             #Find maximum Crowding Distance in remaiining Candidate
                              for p in range(len(remaining)):
-                                # print("getcrowdingdistance:",remaining[p].getCrowdingDistance())
+                               
                                 if(remaining[p].getCrowdingDistance()>maximum):
                                                maximum=remaining[p].getCrowdingDistance()
                                                indis=p
@@ -307,16 +304,13 @@ class PopulationNSGA:
                              if(indis>-1):  
                                 extremes.append(remaining[indis])
                                 remaining[indis].setCrowdingDistanceLevel(level)
-                                # print(remaining[s].getObjectiveValues(),":",level)
+                              
                                 level=level+1
                                 maximum=-1
                                 indis=-1
                                 for g in range(len(remaining)):
                                     remaining[g].setCrowdingDistance(0)
-                # for i in range(len(fListe)):
-                #     print(fListe[i].getObjectiveValues(),":",fListe[i].getCrowdingDistanceLevel())
-                # ads=1            
-                        
+               
                      
                         
                            
