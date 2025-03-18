@@ -244,7 +244,7 @@ class Candidate:
     def setDominatingCandidates(self, new_values):
         self.dominating_candidates = new_values
         
-    def setCcrowdingDistanceLevel(self, value):
+    def setCrowdingDistanceLevel(self, value):
         self.crowding_distance_level = value   
     
     def setCrowdingDistance(self, cd):
@@ -345,6 +345,6 @@ class Candidate:
         candidate_copy.setDominatedCandidates(self.getDominatedCandidates())
         candidate_copy.setDominatingCandidates(self.getDominatingCandidates())
         candidate_copy.setCrowdingDistance(self.getCrowdingDistance())
-        candidate_copy.setCcrowdingDistanceLevel(self.getCrowdingDistanceLevel())
+        candidate_copy.setCrowdingDistanceLevel(self.getCrowdingDistanceLevel())
         
         return candidate_copy

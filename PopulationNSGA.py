@@ -20,6 +20,7 @@ import Purposes as benchmarks
 import random
 import csv
 from os import path
+import copy as cp
 
 
 class PopulationNSGA:
@@ -190,7 +191,9 @@ class PopulationNSGA:
         return candidates_list
 
     def findMaxMinInObjectives(self, front_list):
+       
         objective_count = front_list[0].getobjectiveCount()
+     
 
         self.objective_values_max.clear()
         self.objective_values_min.clear()
@@ -220,91 +223,110 @@ class PopulationNSGA:
             max_values, min_values = self.findMaxMinInObjectives(front_list)
 
             for obj in range(objective_count):
-                front_list = self.sort_by_objective(obj, front_list)
+                front_list = self.sortbyObjective(obj, front_list)
                 for i in range(len(front_list)):
-                    front_list[i].set_crowding_distance(0)
-                    if front_list[i].get_objective_values()[obj] == max_values[obj]:
-                        front_list[i].set_crowding_distance(np.inf)
-                    elif front_list[i].getObjectiveFunctionValues()[obj] == min_values[obj]:
-                        front_list[i].set_crowding_distance(np.inf)
+                    front_list[i].setCrowdingDistance(0)
+                    if front_list[i].getObjectiveValues()[obj] == max_values[obj]:
+                        front_list[i].setCrowdingDistance(np.inf)
+                    elif front_list[i].getObjectiveValues()[obj] == min_values[obj]:
+                        front_list[i].setCrowdingDistance(np.inf)
                     else:
-                        previous = front_list[i - 1].get_objective_values()[obj]
-                        next_value = front_list[i + 1].get_objective_values()[obj]
-                        distance = front_list[i].get_crowding_distance() + np.abs(next_value - previous) / np.abs(max_values[obj] - min_values[obj])
-                        front_list[i].set_crowding_distance(distance)
+                        previous = front_list[i - 1].getObjectiveValues()[obj]
+                        next_value = front_list[i + 1].getObjectiveValues()[obj]
+                        distance = front_list[i].getCrowdingDistance() + np.abs(next_value - previous) / np.abs(max_values[obj] - min_values[obj])
+                        front_list[i].setCrowdingDistance(distance)
 
             self.population.extend(front_list)
         self.allFrontLists.clear()
-    def CalculateCrowdingDistanceCustom(self):
+    def CalculateCrowdingDistanceLevel(self):
 
-    # Keep the number of objectives
-        objectiveCount = self.population[0].getobjectiveCount()
+            # Amaç sayısını koru
+            amacSayi = 2
     
-        # First, split the population into sublists according to the fronts
-        # If front splitting is called separately, make it passive
-        # self.SplitFronts()
-    
-        # After crowding distance is calculated, the population will be loaded back
-        # Therefore, clear the old one
-        self.population.clear()
-        
-    
-        for k in range(len(self.allFrontLists)):
-            max_add = False
-            min_add = False
-            list = []
-            level = 1
-            fList = self.allFrontLists[k]
-            for j in range(len(fList)):
-                for obj in range(objectiveCount):
-                    maxs, mins = self.findMaxMinInObjectives(fList)
-                    for i in range(len(fList)):
-                        fList[i].setCrowdingDistance(0)
-                        if(fList[i].getObjectiveValues()[obj] == maxs[obj] and not max_add):
-                            # print("maxs[obj]:", fList[i])
-                            fList[i].setCrowdingDistance(np.inf)
-                            fList[i].setCrowdingDistanceLevel(level)
-                            list.append(fList[i])
-                            max_add = True
-                        elif(fList[i].getObjectiveValues()[obj] == mins[obj] and not min_add):
-                            fList[i].setCrowdingDistance(np.inf)
-                            fList[i].setCrowdingDistanceLevel(level)
-                            list.append(fList[i])
-                            min_add = True
-                          
-             
-    
-                # For each objective. Sort, assign inf to the first and last
-                # The remaining ones are calculated according to the previous and next objective values
-                max = 0
-                index = -1
-                level = level + 1
-            
-                for i in range(len(fList)):
-                    # print("function:", self.element_exists(list, i), " i:", i, " list:", list)
-                    if(not self.element_exists(list, fList[i])):
-                        # print("candidates are not the same:", fList[i])
-                        fList[i].setCrowdingDistance(0)
-                        for j in range(len(list)):
-                            for obj in range(objectiveCount):
+            # self.population.clear()
+ 
+            for k in range(len(self.allFrontLists)):
+                
+               
+                level=1
+              
+                fListe = self.allFrontLists[k]
+                
+               
+                n=len(fListe)
+                if n <= 2:
+                    for individual in fListe:
+                        individual.setCrowdingDistance(float('inf'))  # Uç noktalar sonsuz
+                        return
+
+               
+                for i in range(n):
+                    fListe[i].setCrowdingDistance(0) 
+                  
+                for amc in range(amacSayi):  # Her amaç için dön
+                         obj_values = [ind.getObjectiveValues()[amc] for ind in fListe]  
+                         max_val = max(obj_values)  
+                         min_val = min(obj_values)  
+
+        # Uç noktaları bul ve listeye ekle (aynı elemanı iki kere eklememek için set kullanabiliriz)
+                extremes = [ind for ind in fListe if ind.getObjectiveValues()[amc] in (max_val, min_val)]
+                remaining = [
+    ind for ind in fListe 
+    if not any(all(ind.getObjectiveValues()[i] == ext.getObjectiveValues()[i] for i in range(len(ind.getObjectiveValues()))) for ext in extremes)
+]
+
+
+                for t in range(len(extremes)):
+                    extremes[t].setCrowdingDistanceLevel(0)
+                    # print("extremes:",extremes[t].getObjectiveValues(),":0")
+                # print("len(extreme):",len(extremes))  
+                # print("len(flist):",len(fListe))
+                if(len(extremes)>2):
+                    a=1
+                maximum=0
+                for m in range(len(remaining)):
+                    
+                    for s in range(len(remaining)):
+                        # Candidate has no Crowding distance Level
+                        if(remaining[s].getCrowdingDistanceLevel()==-1):
+                             for j in range (len(extremes)):
+                                        
+                                for amc in range(amacSayi):
+                                         remaining[s].setCrowdingDistance(remaining[s].getCrowdingDistance()+ np.abs(remaining[s].getObjectiveValues()[amc]-extremes[j].getObjectiveValues()[amc]))
                                
-                                c = fList[i].getCrowdingDistance() + np.abs(fList[i].getObjectiveValues()[obj] - list[j].getObjectiveValues()[obj])
-                               
-                                fList[i].setCrowdingDistance(c)
-                                if(c > max):
-                                    max = c
-                                    index = i
-                    if(index > -1):                
-                        list.append(fList[index])
-                        fList[index].setCrowdingDistanceLevel(level)  
-                        level = level + 1      
-                     
-                        max = 0
-                        index = -1
+                             maximum=-1
+                             indis=-1
+                            #Find maximum Crowding Distance in remaiining Candidate
+                             for p in range(len(remaining)):
+                                # print("getcrowdingdistance:",remaining[p].getCrowdingDistance())
+                                if(remaining[p].getCrowdingDistance()>maximum):
+                                               maximum=remaining[p].getCrowdingDistance()
+                                               indis=p
+                            
+                                               #Assign Crowding Distance Level to Candidate has maximum Crowding distance indis=p
+                             if(indis>-1):  
+                                extremes.append(remaining[indis])
+                                remaining[indis].setCrowdingDistanceLevel(level)
+                                # print(remaining[s].getObjectiveValues(),":",level)
+                                level=level+1
+                                maximum=-1
+                                indis=-1
+                                for g in range(len(remaining)):
+                                    remaining[g].setCrowdingDistance(0)
+                # for i in range(len(fListe)):
+                #     print(fListe[i].getObjectiveValues(),":",fListe[i].getCrowdingDistanceLevel())
+                # ads=1            
                         
+                     
+                        
+                           
+                        
+                                           
+
+            
         
-            self.population.extend(fList)
-        self.allFrontLists.clear()
+
+   
     def IsSpecialSelectionNeeded(self):
         self.SortPopulationByFront()
     

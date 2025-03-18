@@ -14,6 +14,7 @@ import Purposes as objectives
 from os import path
 import matplotlib.pyplot as plt
 import csv
+import time
 
 
 populationSize = 20
@@ -21,7 +22,7 @@ MuCoefficient = 20
 mumCoefficient = 20
 crossoverProbability = .9
 mutationProbability = .1
-max_iteration = 100
+max_iteration = 10
 numOfObjective=2
 ObjectiveFunciton=["precision","recall"]
 lower = np.array([0, 0])
@@ -117,7 +118,12 @@ def PerformOperation(classIndex, pop, method, x_train,y_train, fold):
 
         pop.split_fronts()
         if(method):
-           pop.CalculateCrowdingDistanceCustom()
+           
+           # start_time = time.time()
+           pop.calculate_crowding_distance()
+           # finishtime = time.time()
+           # time_difference_ms = (finishtime - start_time) * 1000
+           # print(f"Geçen süre: {time_difference_ms} ms")
         else:
            pop.CalculateCrowdingDistance()
         needed = pop.IsSpecialSelectionNeeded ()
@@ -167,12 +173,12 @@ for fold, (train_index, test_index) in enumerate(kf.split(X), start=1):  # For f
         # Training phase 
         
         BestTrain = PerformOperation(classIndex, pop, True, X_train,y_train, fold)
-        for i in range(0, len(BestTrain)):
-            print("Train Precision:", np.round(BestTrain[i].getObjectiveValues()[0], 3), "Recall:", np.round(BestTrain[i].getObjectiveValues()[1], 3))  
+        # for i in range(0, len(BestTrain)):
+            # print("Train Precision:", np.round(BestTrain[i].getObjectiveValues()[0], 3), "Recall:", np.round(BestTrain[i].getObjectiveValues()[1], 3))  
         
         print("Fold Number:", fold, "Class:", classIndex, " Test")
         
         BestTest = doTest(classIndex, BestTrain,  X_test,y_test,fold)
     
-        for i in range(0, len(BestTest)):
-            print("Test Precision:", np.round(BestTest[i][0], 3), "Recall:", np.round(BestTest[i][1], 3))    
+        # for i in range(0, len(BestTest)):
+            # print("Test Precision:", np.round(BestTest[i][0], 3), "Recall:", np.round(BestTest[i][1], 3))    
